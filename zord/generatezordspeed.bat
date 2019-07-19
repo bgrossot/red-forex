@@ -1,0 +1,1 @@
+red-064.exe -r -t MSDOS zordspeed.red

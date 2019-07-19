@@ -57,24 +57,6 @@ val_fx: func [] [
     return first split sprefound " "
 ]
 
-make-fxeee-paire: func [ paire pivot tendance ] [
-    ftarg: text pivot font-name "arial" font-color tendance font-size 22 bold
-    on-down [res1: prompt-popup "pivot" if not empty? res1 [ftarg/text: res1] ] 
-    on-alt-down [either ftarg/font/color == blue [ftarg/font/color: red] [ftarg/font/color: blue] ]
-
-    t: text "1.2345" font-name "arial" font-color black font-size 22 bold
-    rate 0:0:15
-    on-time [t/text: val_fx]
-    on-down [res2: prompt-popup "paire" makefxurl res2]
-]
-
-;cpt: 0
-;loop nbp [
-;paire: copy paires/(cpt + 1)
-;    pivot: copy paires/(cpt + 2)
-;    tendance: copy paires/(cpt + 3)
-;    cpt: cpt + 3
-
 make-fx-paire: func [ paire [url!] pivot [string!] tendance [tuple!] cpt [integer!]] [
     opivotname: to-word rejoin ["opivot" to-string cpt]
     compose/deep [
@@ -82,7 +64,14 @@ make-fx-paire: func [ paire [url!] pivot [string!] tendance [tuple!] cpt [intege
     ;on-alt-down [either (to-set-path [(opivotname) font color]) == blue [opivot/font/color: red] [opivot/font/color: blue] ]
     on-alt-down [if [ to-path compose [(to-word opivotname) font color] == blue ] [ print to-path compose [(to-word opivotname) font color]  ] ]
 
-    opaire: text "1.2345" font-name "arial" font-color black font-size 22 bold
+    opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
+    rate 0:0:10
+    on-time [valf1: val_fx paire1 opaire1/text: valf1
+             either  opivot1/font/color == blue
+             [either (to-float valf1) < (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
+             [either (to-float valf1) > (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
+            ]
+    on-down [res2: prompt-popup "Paire1 ?" paire1: makefxurl res2]
     ]
 ]
 

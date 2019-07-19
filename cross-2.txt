@@ -1,0 +1,6 @@
+EURCAD
+1.5132
+buy
+USDJPY
+112
+buy

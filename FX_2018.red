@@ -1,5 +1,7 @@
 Red [needs: view]
 
+system/view/debug?: no
+
 makefxurl: function [ paire ] [
     fxurl: copy "https://rates.fxcm.com/ShowAllCharts?s="
     append fxurl paire
@@ -45,7 +47,7 @@ prompt-popup: func [ titre msg ] [
     result
 ]
 
-popup-test: func [ titre ] [
+popup-menu: func [ titre ] [
     result: "Aucun" ;-- in case user closes window with 'X'
     view/flags [
         title titre
@@ -71,6 +73,18 @@ val_fx: func [ url ] [
 
 coltend1: to-tuple either tendance1 == "buy" [blue] [red]
 
+setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; être dans un block permet le passage par référence
+strurl: reduce data/1
+objpaire: reduce data/2
+objpivot: reduce data/3
+strtendance: reduce data/4
+
+valf: val_fx strurl objpaire/text: valf
+either strtendance == "buy"
+[either (to-float valf) < (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
+[either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
+]
+
 view layout [
     title "Surveillance FX"
     across
@@ -82,22 +96,14 @@ view layout [
 
     opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
     rate 0:0:10
-    on-created [valf1: val_fx paire1url opaire1/text: valf1
-                either tendance1 == "buy"
-                [either (to-float valf1) < (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-                [either (to-float valf1) > (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-            ]
-    on-time [valf1: val_fx paire1url opaire1/text: valf1
-                either tendance1 == "buy"
-                [either (to-float valf1) < (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-                [either (to-float valf1) > (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-            ]
+    on-created [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
+    on-time [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
+
     with [menu: ["Sauvegarde" change]]
     on-menu [
        if event/picked = 'change [
             write/lines filesav reduce [paire1 pivot1 tendance1]
        ]
     ]
-    ;on-down [res2: prompt-popup "Choix d'une paire" "Paire1 ?" paire1: makefxurl res2]
-    on-down [res2: popup-test "Choix d'une paire" paire1: res2 paire1url: makefxurl res2]
+    on-down [res2: popup-menu "Choix d'une paire" paire1: res2 paire1url: makefxurl res2]
 ]
