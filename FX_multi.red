@@ -1,5 +1,7 @@
 Red [needs: view]
 
+system/view/debug?: no
+
 makefxurl: function [ paire ] [
     fxurl: copy "https://rates.fxcm.com/ShowAllCharts?s="
     append fxurl paire
@@ -7,17 +9,20 @@ makefxurl: function [ paire ] [
     to-url fxurl
 ]
 
-cross: read/lines %cross-multi.txt
+filesav: %cross-multi.txt
+cross: read/lines filesav
 nbp: (length? cross) / 3
 paires: copy [] ; contient les paires : paire pivot tendance
 cpt: 0
 loop nbp [
-    append paires makefxurl cross/(cpt + 1) ; paire
+    paire: cross/(cpt + 1)
+    append paires paire ; paire
     append paires cross/(cpt + 2) ; pivot
-    append paires cross/(cpt + 3) ; tendance
+    append paires cross/(cpt + 3) ; tendance : "buy" ou "sell"
+    append paires makefxurl paire
     cpt: cpt + 3
 ]
-;print paires
+print paires
 
 ;-- prompt-popup displays a message, a field for single-line input, and 
 ;--    'OK' and 'Cancel' buttons. Normally it returns a string, though it returns
@@ -49,12 +54,40 @@ prompt-popup: func [ msg ] [
     result
 ]
 
+popup-menu: func [ titre ] [
+    result: "Aucun" ;-- in case user closes window with 'X'
+    view/flags [
+        title titre
+        drop-list font-name "arial" font-size 22 bold center data [
+        "AUDCAD" "AUDCHF" "AUDJPY" "AUDNZD" "AUDUSD"
+        "CADCHF" "CADJPY" "CHFJPY"
+        "EURAUD" "EURCAD" "EURCHF" "EURGBP" "EURJPY" "EURNZD" "EURUSD"
+        "GBPAUD" "GBPCAD" "GBPCHF" "GBPJPY" "GBPNZD" "GBPUSD"
+        "NZDCAD" "NZDCHF" "NZDJPY" "NZDUSD"
+        "USDCAD" "USDCHF" "USDJPY"
+    ] [result: pick face/data face/selected unview]
+    ] [modal popup]
+    result
+]
+
 val_fx: func [] [
     flux: read url
     found: find flux "Rate: "
     refound: find found "<b>"
 	sprefound: second split refound ">"
     return first split sprefound " "
+]
+
+setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; être dans un block permet le passage par référence
+    strurl: reduce data/1
+    objpaire: reduce data/2
+    objpivot: reduce data/3
+    strtendance: reduce data/4
+
+    valf: val_fx strurl objpaire/text: valf
+    either strtendance == "buy"
+    [either (to-float valf) < (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
+    [either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
 ]
 
 make-fx-paire: func [ paire [url!] pivot [string!] tendance [tuple!] cpt [integer!]] [
@@ -89,8 +122,13 @@ loop nbp [
     paire: copy paires/(cpt + 1)
     pivot: copy paires/(cpt + 2)
     tendance: copy paires/(cpt + 3)
-    append thewindow make-fx-paire paire pivot to-tuple tendance cpt
-    cpt: cpt + 3
+    urlpaire: copy paires/(cpt + 4)
+    print paire
+    print pivot
+    print tendance
+    print urlpaire
+    append thewindow make-fx-paire urlpaire pivot to-tuple tendance cpt
+    cpt: cpt + 4
 ]
 
 view thewindow 

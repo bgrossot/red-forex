@@ -1,5 +1,7 @@
 Red [needs: view]
 
+system/view/debug?: no
+
 makefxurl: function [ paire ] [
     fxurl: copy "https://rates.fxcm.com/ShowAllCharts?s="
     append fxurl paire
@@ -11,11 +13,11 @@ filesav: %cross-2.txt
 cross: read/lines filesav
 paire1: cross/1
 pivot1: cross/2
-tendance1: cross/3 ; "buy" or "sell"
+tendance1: cross/3 ; "buy" ou "sell"
 paire1url: makefxurl paire1
 paire2: cross/4
 pivot2: cross/5
-tendance2: cross/6 ; "buy" or "sell"
+tendance2: cross/6 ; "buy" ou "sell"
 paire2url: makefxurl paire2
 
 ;-- prompt-popup displays a message, a field for single-line input, and 
@@ -72,20 +74,20 @@ val_fx: func [ url ] [
     return first split sprefound " "
 ]
 
+setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; être dans un block permet le passage par référence
+    strurl: reduce data/1
+    objpaire: reduce data/2
+    objpivot: reduce data/3
+    strtendance: reduce data/4
+
+    valf: val_fx strurl objpaire/text: valf
+    either strtendance == "buy"
+    [either (to-float valf) < (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
+    [either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
+]
+
 coltend1: to-tuple either tendance1 == "buy" [blue] [red]
 coltend2: to-tuple either tendance2 == "buy" [blue] [red]
-
-setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; être dans un block permet le passage par référence
-strurl: reduce data/1
-objpaire: reduce data/2
-objpivot: reduce data/3
-strtendance: reduce data/4
-
-valf: val_fx strurl objpaire/text: valf
-either strtendance == "buy"
-[either (to-float valf) < (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
-[either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
-]
 
 view layout [
     title "Surveillance FX"
