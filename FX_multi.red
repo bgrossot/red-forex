@@ -90,22 +90,44 @@ setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; 
     [either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
 ]
 
-make-fx-paire: func [ paire [url!] pivot [string!] tendance [tuple!] cpt [integer!]] [
+make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integer!]] [
+    pivotname: to-word rejoin ["pivot" to-string cpt]
     opivotname: to-word rejoin ["opivot" to-string cpt]
-    compose/deep [
-    (to-set-word opivotname) text (pivot) font-name "arial" font-color (tendance) font-size 22 bold
-    ;on-alt-down [either (to-set-path [(opivotname) font color]) == blue [opivot/font/color: red] [opivot/font/color: blue] ]
-    on-alt-down [if [ to-path compose [(to-word opivotname) font color] == blue ] [ print to-path compose [(to-word opivotname) font color]  ] ]
+    opairename: to-word rejoin ["opaire" to-string cpt]
+    resname1: to-word rejoin ["res1" to-string cpt]
+    resname2: to-word rejoin ["res2" to-string cpt]
 
-    opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
-    rate 0:0:10
-    on-time [valf1: val_fx paire1 opaire1/text: valf1
-             either  opivot1/font/color == blue
-             [either (to-float valf1) < (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-             [either (to-float valf1) > (to-float opivot1/text) [opaire1/font/color: 128.0.0] [opaire1/font/color: 0.128.0]]
-            ]
-    on-down [res2: prompt-popup "Paire1 ?" paire1: makefxurl res2]
+
+    compose/deep [
+    (to-set-word opivotname) text (pivot) font-name "arial" font-size 22 bold
+    on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [(to-set-word pivotname) (resname1) to-path compose [(to-word opivotname) text] (resname1)] ]
+
+
+
+;;;;;
+;>>>>>    on-alt-down [if [ to-path compose [(to-word opivotname) font color] == blue ] [ print to-path compose [(to-word opivotname) font color]  ] ]
+
     ]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;    opivot1: text pivot1 font-name "arial" font-size 22 bold
+;;    on-down [res1: prompt-popup "Entrez le pivot" "Pivot1 ?" if not empty? res1 [pivot1: res1 opivot1/text: res1] ] 
+;>>>>>    on-alt-down [either opivot1/font/color == blue [tendance1: "sell" opivot1/font/color: red] [tendance1: "buy" opivot1/font/color: blue] ]
+
+;>>>>>    opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
+;>>>>>    rate 0:0:10
+;>>>>>    on-created [ setvaltend [ paire1url opaire1 opivot1 tendance1 ]
+;>>>>>                 opivot1/font/color: to-tuple either tendance1 == "buy" [blue] [red] ]
+;>>>>>    on-time [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
+;>>>>>    on-down [res2: popup-menu "Choix d'une paire" paire1: res2 paire1url: makefxurl res2]
+;; unique
+;>>>>>    with [menu: ["Sauvegarde" change]]
+;>>>>>    on-menu [
+;>>>>>       if event/picked = 'change [
+;>>>>>            write/lines filesav reduce [paire1 pivot1 tendance1]
+;>>>>>       ]
+;>>>>>    ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ]
 
 make-head: func [] [
@@ -127,29 +149,10 @@ loop nbp [
     print pivot
     print tendance
     print urlpaire
-    append thewindow make-fx-paire urlpaire pivot to-tuple tendance cpt
+    append thewindow make-fx-paire urlpaire pivot tendance cpt
     cpt: cpt + 4
 ]
 
-view thewindow 
-; layout [
-;    across
-;    origin 0x0
+print thewindow
 
-;make-test
-;cpt: 0
-;loop nbp [
-;paire: copy paires/(cpt + 1)
-;    pivot: copy paires/(cpt + 2)
-;    tendance: copy paires/(cpt + 3)
-;    cpt: cpt + 3
-
-    ;ftarg: text target font-name "arial" font-color trend font-size 22 bold
-    ;on-down [res1: prompt-popup "target" if not empty? res1 [ftarg/text: res1] ] 
-    ;on-alt-down [either ftarg/font/color == blue [ftarg/font/color: red] [ftarg/font/color: blue] ]
-
-    ;t: text "1.2345" font-name "arial" font-color black font-size 22 bold
-    ;rate 0:0:15
-    ;on-time [t/text: val_fx]
-    ;on-down [res2: prompt-popup "paire" makefxurl res2]
-;]
+;view thewindow 

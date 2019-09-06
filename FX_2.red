@@ -102,6 +102,7 @@ view layout [
     rate 0:0:10
     on-created [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
     on-time [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
+    on-down [res3: popup-menu "Choix d'une paire" paire1: res3 paire1url: makefxurl res3]
 
     opivot2: text pivot2 font-name "arial" font-color coltend2 font-size 22 bold
     on-down [res2: prompt-popup "Entrez le pivot" "Pivot2 ?" if not empty? res2 [pivot2: res2 opivot2/text: res2] ] 
@@ -111,6 +112,8 @@ view layout [
     rate 0:0:10
     on-created [ setvaltend [ paire2url opaire2 opivot2 tendance2 ] ]
     on-time [ setvaltend [ paire2url opaire2 opivot2 tendance2 ] ]
+    on-down [res4: popup-menu "Choix d'une paire" paire1: res4 paire1url: makefxurl res4]
+
     with [menu: ["Sauvegarde" change]]
     on-menu [
        if event/picked = 'change [
@@ -118,5 +121,4 @@ view layout [
             write/lines filesav reduce [paire2 pivot2 tendance2]
        ]
     ]
-    on-down [res3: popup-menu "Choix d'une paire" paire1: res3 paire1url: makefxurl res3]
 ]
