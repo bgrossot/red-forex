@@ -130,14 +130,13 @@ make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integ
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ]
 
-make-head: func [] [
-    compose [
+the-head: [
     across
     origin 0x0
+    znu: text "dsddwdds"
     ]
-]
 
-thewindow: append [] make-head
+thewindow: append [] the-head
 
 cpt: 0
 loop nbp [
@@ -153,6 +152,6 @@ loop nbp [
     cpt: cpt + 4
 ]
 
-print thewindow
+;print thewindow
 
-;view thewindow 
+view layout thewindow 
