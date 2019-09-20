@@ -3,7 +3,7 @@ EURCAD
 buy
 USDJPY
 112
-buy
+sell
 USDCHF
 1.0010
 buy

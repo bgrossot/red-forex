@@ -118,7 +118,7 @@ view layout [
     on-menu [
        if event/picked = 'change [
             write/lines filesav reduce [paire1 pivot1 tendance1]
-            write/lines filesav reduce [paire2 pivot2 tendance2]
+            write/lines/append filesav reduce [paire2 pivot2 tendance2]
        ]
     ]
 ]

@@ -12,23 +12,17 @@ makefxurl: function [ paire ] [
 filesav: %cross-multi.txt
 cross: read/lines filesav
 nbp: (length? cross) / 3
-paires: make block! 0; contient les paires
-clear paires
+paires: copy [] ; contient les paires : paire pivot tendance
 cpt: 0
 loop nbp [
-    unepaire: make block! 4; contient une paire : paire pivot tendance url
-    append unepaire cross/(cpt + 1) ; paire
-    append unepaire cross/(cpt + 2) ; pivot
-    append unepaire cross/(cpt + 3) ; tendance : "buy" ou "sell"
-    append unepaire makefxurl unepaire/1
+    paire: cross/(cpt + 1)
+    append paires paire ; paire
+    append paires cross/(cpt + 2) ; pivot
+    append paires cross/(cpt + 3) ; tendance : "buy" ou "sell"
+    append paires makefxurl paire
     cpt: cpt + 3
-    append/only paires unepaire
 ]
-
-repeat i nbp
-[
-    print paires/(i)
-]
+print paires
 
 ;-- prompt-popup displays a message, a field for single-line input, and 
 ;--    'OK' and 'Cancel' buttons. Normally it returns a string, though it returns
@@ -108,8 +102,9 @@ make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integ
     (to-set-word opivotname) text (pivot) font-name "arial" font-size 22 bold
     on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [(to-set-word pivotname) (resname1) to-path rejoin [opivotname "/text"] (resname1)] ]
     ;;on-alt-down [either to-path compose [(to-word opivotname) font color] == blue [(to-set-word tendance) "sell" to-set-word (to-path compose [(to-word opivotname) font color]) red] [(to-set-word tendance) "buy" to-set-word (to-path compose [(to-word opivotname) font color]) blue] ]
-    on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [(to-set-word tendance) "sell" to-set-path (to-path rejoin [(to-word opivotname) "/font/color"]) red] ]
-
+    ;on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [(to-set-word tendance) "sell" to-set-path (to-path rejoin [(to-word opivotname) "/font/color"]) red] ]
+    on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [print "eertf"] ]
+    
     ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -140,19 +135,20 @@ the-head: [
 
 thewindow: append [] the-head
 
-cpt: 1
-repeat i nbp [
-    paire: copy paires/(i)/1
-    pivot: copy paires/(i)/2
-    tendance: copy paires/(i)/3
-    urlpaire: copy paires/(i)/4
+cpt: 0
+loop nbp [
+    paire: copy paires/(cpt + 1)
+    pivot: copy paires/(cpt + 2)
+    tendance: copy paires/(cpt + 3)
+    urlpaire: copy paires/(cpt + 4)
     print paire
     print pivot
     print tendance
     print urlpaire
-    ;append thewindow make-fx-paire urlpaire pivot tendance cpt
+    append thewindow make-fx-paire urlpaire pivot tendance cpt
+    cpt: cpt + 4
 ]
 
 ;print thewindow
 
-;view layout thewindow 
+view layout thewindow 
