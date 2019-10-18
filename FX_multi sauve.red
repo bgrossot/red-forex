@@ -90,7 +90,8 @@ setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; 
     [either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
 ]
 coucou: black
-make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integer!]] [
+;make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integer!]] [
+make-fx-paire: func [ data [block!] ] [
     pivotname: to-word rejoin ["pivot" to-string cpt]
     opivotname: to-word rejoin ["opivot" to-string cpt]
     opairename: to-word rejoin ["opaire" to-string cpt]
@@ -100,7 +101,7 @@ make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integ
 
     compose/deep [
     (to-set-word opivotname) text (pivot) font-name "arial" font-size 22 bold
-    on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [(to-set-word pivotname) (resname1) to-path rejoin [opivotname "/text"] (resname1)] ]
+    on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [(to-set-word pivotname) (resname1) to-path rejoin [opivotname "/text"] (pivotname)] ]
     ;;on-alt-down [either to-path compose [(to-word opivotname) font color] == blue [(to-set-word tendance) "sell" to-set-word (to-path compose [(to-word opivotname) font color]) red] [(to-set-word tendance) "buy" to-set-word (to-path compose [(to-word opivotname) font color]) blue] ]
     ;on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [(to-set-word tendance) "sell" to-set-path (to-path rejoin [(to-word opivotname) "/font/color"]) red] ]
     on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [print "eertf"] ]

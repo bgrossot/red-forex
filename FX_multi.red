@@ -2,6 +2,11 @@ Red [needs: view]
 
 system/view/debug?: no
 
+PPAIRE: 1
+PPIVOT: 2
+TTENDANCE: 3
+UURLPAIRE: 4
+
 makefxurl: function [ paire ] [
     fxurl: copy "https://rates.fxcm.com/ShowAllCharts?s="
     append fxurl paire
@@ -76,7 +81,7 @@ popup-menu: func [ titre ] [
     result
 ]
 
-val_fx: func [] [
+val_fx: func [ url ] [
     flux: read url
     found: find flux "Rate: "
     refound: find found "<b>"
@@ -89,27 +94,58 @@ setvaltend: function [ data [block!] ] [ ; "url gfx_paire gfx_pivot tendance" ; 
     objpaire: reduce data/2
     objpivot: reduce data/3
     strtendance: reduce data/4
+    print "-----"
+    print strurl
+    print "-----"
+    print objpaire/text
+    print "-----"
+    print objpivot/text
+    print "-----"
+    print strtendance
+    print "-----"
 
-    valf: val_fx strurl objpaire/text: valf
+    valf: val_fx strurl
+    objpaire/text: valf
     either strtendance == "buy"
     [either (to-float valf) < (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
     [either (to-float valf) > (to-float objpivot/text) [objpaire/font/color: 128.0.0] [objpaire/font/color: 0.128.0]]
 ]
-coucou: black
-make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integer!]] [
-    pivotname: to-word rejoin ["pivot" to-string cpt]
-    opivotname: to-word rejoin ["opivot" to-string cpt]
-    opairename: to-word rejoin ["opaire" to-string cpt]
-    resname1: to-word rejoin ["res1" to-string cpt]
-    resname2: to-word rejoin ["res2" to-string cpt]
 
+make-fx-paire: func [ ii [integer!]] [
+    opivotname: to-word rejoin ["opivot" to-string ii]
+    opairename: to-word rejoin ["opaire" to-string ii]
+    resname1: to-word rejoin ["res1" to-string ii]
+    resname2: to-word rejoin ["res2" to-string ii]
+
+    pairepivot: to-path compose [paires (ii) (:PPIVOT)]
+    probe pairepivot
+
+    ; si tu veux rester une solution en ligne de commande, attention il y a un piège
+    ; tout est fait au sein d'un "compose" !
 
     compose/deep [
-    (to-set-word opivotname) text (pivot) font-name "arial" font-size 22 bold
-    on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [(to-set-word pivotname) (resname1) to-path rejoin [opivotname "/text"] (resname1)] ]
-    ;;on-alt-down [either to-path compose [(to-word opivotname) font color] == blue [(to-set-word tendance) "sell" to-set-word (to-path compose [(to-word opivotname) font color]) red] [(to-set-word tendance) "buy" to-set-word (to-path compose [(to-word opivotname) font color]) blue] ]
-    on-alt-down [if to-path (rejoin [opivotname "/font/color"]) == black [(to-set-word tendance) "sell" to-set-path (to-path rejoin [(to-word opivotname) "/font/color"]) red] ]
+        (to-set-word opivotname) text (paires/:ii/:PPIVOT) font-name "arial" font-size 22 bold
+        on-down [(to-set-word resname1) prompt-popup "Entrez le pivot" "Pivot ?" if not empty? (resname1) [
+                                                                                 (to-set-path pairepivot) copy (resname1)
+                                                                                 obj: (opivotname)
+                                                                                 obj/text: (pairepivot) ; (opivotname)/text ne fontionne pas
+                                                                                 ;print type? obj
+                                                                                 ;print type? obj/text
+                                                                                 ; devrait fonctionner, ya un truc qui m'échappe
+                                                                                 ;(to-set-path rejoin [(opivotname) "/text"]) "ppp"
+        ] ]
 
+        ; en attente de résulution du cas "ii"
+        ;on-alt-down [
+        ;            obj: (opivotname)           ; ya un truc qui m'échappe, cf. plus haut
+        ;            either obj/font/color == blue [paires/:ii/:TTENDANCE: "sell" obj/font/color: red] [paires/:ii/:TTENDANCE: "buy" obj/font/color: blue
+        ;] ]
+
+        ;(to-set-word opairename) text "1.2345" font-name "arial" font-color black font-size 22 bold
+        ;rate 0:0:10
+        ;on-created [ setvaltend [ paires/:ii/:UURLPAIRE (opairename) (opivotname) paires/:ii/:TTENDANCE ]
+        ;             obj: (opivotname)          ; ya un truc qui m'échappe, cf. plus haut
+        ;             obj/font/color: to-tuple either paires/:ii/:TTENDANCE == "buy" [blue] [red] ]
     ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -117,19 +153,19 @@ make-fx-paire: func [ paire [url!] pivot [string!] tendance [string!] cpt [integ
 ;;    on-down [res1: prompt-popup "Entrez le pivot" "Pivot1 ?" if not empty? res1 [pivot1: res1 opivot1/text: res1] ] 
 ;;    on-alt-down [either opivot1/font/color == blue [tendance1: "sell" opivot1/font/color: red] [tendance1: "buy" opivot1/font/color: blue] ]
 
-;>>>>>    opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
-;>>>>>    rate 0:0:10
-;>>>>>    on-created [ setvaltend [ paire1url opaire1 opivot1 tendance1 ]
-;>>>>>                 opivot1/font/color: to-tuple either tendance1 == "buy" [blue] [red] ]
-;>>>>>    on-time [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
-;>>>>>    on-down [res2: popup-menu "Choix d'une paire" paire1: res2 paire1url: makefxurl res2]
-;; unique
-;>>>>>    with [menu: ["Sauvegarde" change]]
-;>>>>>    on-menu [
-;>>>>>       if event/picked = 'change [
-;>>>>>            write/lines filesav reduce [paire1 pivot1 tendance1]
-;>>>>>       ]
-;>>>>>    ]
+;;;;;;;;;;;    opaire1: text "1.2345" font-name "arial" font-color black font-size 22 bold
+;;;;;;;;;;;    rate 0:0:10
+;;;;;;;;;;;    on-created [ setvaltend [ paire1url opaire1 opivot1 tendance1 ]
+;;;;;;;;;;;                 opivot1/font/color: to-tuple either tendance1 == "buy" [blue] [red] ]
+;;;;;;;;;;;    on-time [ setvaltend [ paire1url opaire1 opivot1 tendance1 ] ]
+
+;;;;;;;;;;;    with [menu: ["Sauvegarde" change]]
+;;;;;;;;;;;    on-menu [
+;;;;;;;;;;;       if event/picked = 'change [
+;;;;;;;;;;;            write/lines filesav reduce [paire1 pivot1 tendance1]
+;;;;;;;;;;;       ]
+;;;;;;;;;;;    ]
+;;;;;;;;;;;    on-down [res2: popup-menu "Choix d'une paire" paire1: res2 paire1url: makefxurl res2]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ]
 
@@ -142,17 +178,18 @@ thewindow: append [] the-head
 
 cpt: 1
 repeat i nbp [
-    paire: copy paires/(i)/1
-    pivot: copy paires/(i)/2
-    tendance: copy paires/(i)/3
-    urlpaire: copy paires/(i)/4
+    paire: copy paires/:i/:PPAIRE
+    pivot: copy paires/:i/:PPIVOT
+    tendance: copy paires/:i/:TTENDANCE
+    urlpaire: copy paires/:i/:UURLPAIRE
     print paire
     print pivot
     print tendance
     print urlpaire
     ;append thewindow make-fx-paire urlpaire pivot tendance cpt
+    append thewindow make-fx-paire i
 ]
 
 ;print thewindow
 
-;view layout thewindow 
+view layout thewindow 
